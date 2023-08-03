@@ -1,6 +1,7 @@
 using APICatalogo.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
+using APICatalogo.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddSwaggerGen();
 
 var mySqlConnection = builder.Configuration.GetConnectionString("DefaultConnection");
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseMySql(mySqlConnection, ServerVersion.AutoDetect(mySqlConnection)));
 
 var app = builder.Build();

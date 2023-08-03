@@ -1,7 +1,6 @@
-﻿using APICatalogo.Context;
-using APICatalogo.Domain;
+﻿using APICatalogo.Domain;
+using APICatalogo.Repository;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers
 {
@@ -9,17 +8,23 @@ namespace APICatalogo.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ProductsController(AppDbContext context)
+        public ProductsController( IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
+        }
+
+        [HttpGet("lowestprice")]
+        public ActionResult<IEnumerable<Product>> GetProductsPrice()
+        {
+            return _unitOfWork.ProductRepository.GetProductsPrice().ToList();
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<Product>> Get()
         {
-            var products = _context.Products.AsNoTracking().ToList();
+            var products = _unitOfWork.ProductRepository.Get().ToList();
 
             if (products == null || products.Count == 0) return NotFound("Produtos não encontrado");
 
@@ -29,7 +34,7 @@ namespace APICatalogo.Controllers
         [HttpGet("{id:int}", Name ="ObterProduto")]
         public ActionResult<Product> GetById(int id)
         {
-            var product = _context.Products.AsNoTracking().FirstOrDefault(p => p.ProductId == id);
+            var product = _unitOfWork.ProductRepository.GetById(p => p.ProductId == id);
 
             if (product is null) return NotFound("Produto não encontrado!");
 
@@ -41,8 +46,8 @@ namespace APICatalogo.Controllers
         {
             if (product is null) return BadRequest();
 
-            _context.Products.Add(product);
-            _context.SaveChanges();
+            _unitOfWork.ProductRepository.Add(product);
+            _unitOfWork.Commit();
 
            return new CreatedAtRouteResult("ObterProduto", new {id = product.ProductId }, product);
         }
@@ -52,8 +57,8 @@ namespace APICatalogo.Controllers
         {
             if(id != product.ProductId) return BadRequest();
 
-            _context.Entry(product).State = EntityState.Modified;
-            _context.SaveChanges();
+            _unitOfWork.ProductRepository.Update(product);
+            _unitOfWork.Commit();
 
             return Ok(product);
         }
@@ -61,13 +66,12 @@ namespace APICatalogo.Controllers
         [HttpDelete("{id:int}")]
         public ActionResult Delete(int id)
         {
-            var product = _context.Products.FirstOrDefault(p => p.ProductId == id);
-           // var product = _context.Products.Find(id); // vantagem busca na memória
+            var product = _unitOfWork.ProductRepository.GetById(p => p.ProductId == id);
 
             if (product is null) return NotFound("Produto não encontrado...");
 
-            _context.Products.Remove(product);
-            _context.SaveChanges();
+            _unitOfWork.ProductRepository.Delete(product);
+            _unitOfWork.Commit();
 
             return Ok(product);
         }
