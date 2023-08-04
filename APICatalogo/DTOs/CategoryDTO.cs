@@ -11,6 +11,5 @@ public class CategoryDTO
     public string? ImageUrl { get; set; }
     
     [JsonIgnore]
-
     public ICollection<ProductDTO>? Products { get; set; }
 }
