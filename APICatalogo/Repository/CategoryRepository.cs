@@ -11,14 +11,14 @@ public class CategoryRepository: Repository<Category>, ICategoryRepository
     {
     }
 
-    public IEnumerable<Category> GetCategoriesProducts()
+    public async Task<IEnumerable<Category>> GetCategoriesProducts()
     {
-        return Get().Include(p => p.Products);
+        return await Get().Include(p => p.Products).ToListAsync();
     }
 
-    public PagedList<Category> GetCategories(CategoriesParameters categoriesParameters)
+    public async Task<PagedList<Category>> GetCategories(CategoriesParameters categoriesParameters)
     {
-        return PagedList<Category>.ToPagedList(Get().OrderBy(c => c.CategoryId),
+        return await PagedList<Category>.ToPagedList(Get().OrderBy(c => c.CategoryId),
             categoriesParameters.PageNumber,
             categoriesParameters.PageSize);
     }
