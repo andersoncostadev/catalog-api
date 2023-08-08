@@ -93,7 +93,9 @@ namespace APICatalogo.Controllers
             _unitOfWork.CategoryRepository.Update(category);
             await _unitOfWork.Commit();
 
-            return Ok(category);
+            var updatedCategoryDto = _mapper.Map<CategoryDTO>(category);
+
+            return Ok(updatedCategoryDto);
         }
 
         [HttpDelete("{id:int}")]
