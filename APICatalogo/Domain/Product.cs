@@ -18,7 +18,9 @@ public class Product
     public string? Description { get; set; }
 
     [Required]
-    [Column(TypeName ="decimal(10,2)")]
+    [DataType(DataType.Currency)]
+    [Column(TypeName = "decimal(8,2)")]
+    [Range(1, 10000, ErrorMessage = "O preço deve estar entre {1} e {2}")]
     public decimal Price { get; set; }
 
     [Required]
